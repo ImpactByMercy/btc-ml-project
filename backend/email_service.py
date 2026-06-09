@@ -1,29 +1,31 @@
 import os
+import requests
 
 def send_verification_email(email, code):
-    print(f"Verification code for {email}: {code}")
+    print(f'Verification code for {email}: {code}')
+    api_key = os.getenv('SENDGRID_API_KEY')
+    from_email = os.getenv('SENDGRID_FROM_EMAIL', 'mercymusyoka020@gmail.com')
+    if not api_key:
+        print('No SendGrid API key found')
+        return True
     try:
-        import smtplib
-        from email.mime.text import MIMEText
-        from email.mime.multipart import MIMEMultipart
-        sender_email = os.getenv("GMAIL_EMAIL")
-        sender_password = os.getenv("GMAIL_APP_PASSWORD")
-        if not sender_email or not sender_password:
-            return True
-        message = MIMEMultipart("alternative")
-        message["Subject"] = "CryptoSense Verification Code"
-        message["From"] = sender_email
-        message["To"] = email
-        html = f"<h1 style=color:#f0b429>{code}</h1><p>Your CryptoSense verification code</p>"
-        message.attach(MIMEText(html, "html"))
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=5) as server:
-            server.login(sender_email, sender_password)
-            server.sendmail(sender_email, email, message.as_string())
-        print("Email sent")
+        response = requests.post(
+            'https://api.sendgrid.com/v3/mail/send',
+            headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'},
+            json={
+                'personalizations': [{'to': [{'email': email}], 'subject': 'CryptoSense Verification Code'}],
+                'from': {'email': from_email, 'name': 'CryptoSense DSS'},
+                'content': [{'type': 'text/html', 'value': f'<h2 style="color:#f0b429">{code}</h2><p>Your CryptoSense DSS verification code. Expires in 10 minutes.</p>'}]
+            }
+        )
+        if response.status_code == 202:
+            print(f'Email sent to {email} via SendGrid')
+        else:
+            print(f'SendGrid error: {response.status_code} {response.text}')
     except Exception as e:
-        print(f"Email skipped: {e}")
+        print(f'Email error: {e}')
     return True
 
 def send_password_reset_email(email, reset_link):
-    print(f"Password reset for {email}: {reset_link}")
+    print(f'Password reset for {email}: {reset_link}')
     return True
