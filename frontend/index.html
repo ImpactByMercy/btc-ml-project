@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CryptoSense DSS</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: linear-gradient(135deg, #0b0c10 0%, #1a1b22 100%);
+        font-family: "IBM Plex Mono", monospace;
+        color: #c9d1d9;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 400px;
+        padding: 20px;
+      }
+
+      .auth-card {
+        background: rgba(13, 14, 20, 0.95);
+        border: 1px solid #1e2030;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+
+      .logo {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .logo h1 {
+        font-family: "DM Sans", sans-serif;
+        font-size: 2.5rem;
+        color: #e6edf3;
+        margin-bottom: 5px;
+      }
+
+      .logo p {
+        font-size: 0.7rem;
+        color: #f0b429;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        font-size: 0.75rem;
+        color: #4b5563;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+      }
+
+      input {
+        width: 100%;
+        padding: 12px;
+        background: #0d0e14;
+        border: 1px solid #1e2030;
+        border-radius: 6px;
+        color: #c9d1d9;
+        font-family: inherit;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #f0b429;
+        box-shadow: 0 0 0 3px rgba(240, 180, 41, 0.1);
+      }
+
+      button {
+        width: 100%;
+        padding: 12px;
+        background: #f0b429;
+        color: #0b0c10;
+        font-family: "DM Sans", sans-serif;
+        font-weight: 600;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-transform: uppercase;
+      }
+
+      button:hover {
+        background: #e6a820;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(240, 180, 41, 0.3);
+      }
+
+      .divider {
+        text-align: center;
+        margin: 20px 0;
+        color: #4b5563;
+        font-size: 0.8rem;
+      }
+
+      .divider::before,
+      .divider::after {
+        content: "";
+        display: inline-block;
+        width: 40%;
+        height: 1px;
+        background: #1e2030;
+        vertical-align: middle;
+      }
+
+      .divider::before {
+        margin-right: 10px;
+      }
+
+      .divider::after {
+        margin-left: 10px;
+      }
+
+      .toggle-link {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 0.8rem;
+        color: #6b7280;
+      }
+
+      .toggle-link a {
+        color: #f0b429;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .toggle-link a:hover {
+        text-decoration: underline;
+      }
+
+      .alert {
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-size: 0.8rem;
+        display: none;
+      }
+
+      .alert-error {
+        background: rgba(248, 81, 73, 0.1);
+        color: #f85149;
+        border: 1px solid #f85149;
+      }
+
+      .alert-success {
+        background: rgba(63, 185, 80, 0.1);
+        color: #3fb950;
+        border: 1px solid #3fb950;
+      }
+
+      .alert.show {
+        display: block;
+      }
+
+      .form-section {
+        display: none;
+      }
+
+      .form-section.active {
+        display: block;
+      }
+
+      .verification-input {
+        text-align: center;
+        font-size: 1.5rem;
+        letter-spacing: 10px;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="auth-card">
+        <div class="logo">
+          <h1>₿</h1>
+          <p>CryptoSense DSS</p>
+        </div>
+
+        <div id="alert" class="alert"></div>
+
+        <!-- Login Section -->
+        <div id="login-section" class="form-section active">
+          <h2
+            style="
+              color: #e6edf3;
+              font-family: &quot;DM Sans&quot;;
+              margin-bottom: 20px;
+              text-align: center;
+            "
+          >
+            Login
+          </h2>
+          <form id="login-form">
+            <div class="form-group">
+              <label for="login-email">Email</label>
+              <input
+                type="email"
+                id="login-email"
+                placeholder="your@email.com"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="login-password">Password</label>
+              <input
+                type="password"
+                id="login-password"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            <button type="submit">Login</button>
+          </form>
+          <div class="toggle-link">
+            Don't have an account? <a onclick="toggleForm()">Register here</a>
+          </div>
+        </div>
+
+        <!-- Register Section -->
+        <div id="register-section" class="form-section">
+          <h2
+            style="
+              color: #e6edf3;
+              font-family: &quot;DM Sans&quot;;
+              margin-bottom: 20px;
+              text-align: center;
+            "
+          >
+            Register
+          </h2>
+          <form id="register-form">
+            <div class="form-group">
+              <label for="register-name">Full Name</label>
+              <input
+                type="text"
+                id="register-name"
+                placeholder="John Doe"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="register-email">Email</label>
+              <input
+                type="email"
+                id="register-email"
+                placeholder="your@email.com"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="register-password">Password</label>
+              <input
+                type="password"
+                id="register-password"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="register-confirm">Confirm Password</label>
+              <input
+                type="password"
+                id="register-confirm"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            <button type="submit">Register</button>
+          </form>
+          <div class="toggle-link">
+            Already have an account? <a onclick="toggleForm()">Login here</a>
+          </div>
+        </div>
+
+        <!-- Verification Section -->
+        <div id="verify-section" class="form-section">
+          <h2
+            style="
+              color: #e6edf3;
+              font-family: &quot;DM Sans&quot;;
+              margin-bottom: 20px;
+              text-align: center;
+            "
+          >
+            Verify Email
+          </h2>
+          <p
+            style="
+              text-align: center;
+              color: #6b7280;
+              margin-bottom: 20px;
+              font-size: 0.9rem;
+            "
+          >
+            Enter the 6-digit code sent to your email
+          </p>
+          <form id="verify-form">
+            <div class="form-group">
+              <input
+                type="text"
+                id="verify-code"
+                class="verification-input"
+                placeholder="000000"
+                maxlength="6"
+                required
+              />
+            </div>
+            <button type="submit">Verify & Login</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:5000";
+      let currentUser = null;
+
+      function toggleForm() {
+        document.getElementById("login-section").classList.toggle("active");
+        document.getElementById("register-section").classList.toggle("active");
+        clearAlert();
+      }
+
+      function showAlert(message, type = "error") {
+        const alert = document.getElementById("alert");
+        alert.textContent = message;
+        alert.className = `alert ${type === "error" ? "alert-error" : "alert-success"} show`;
+      }
+
+      function clearAlert() {
+        document.getElementById("alert").className = "alert";
+      }
+
+      function showForm(formName) {
+        document
+          .querySelectorAll(".form-section")
+          .forEach((el) => el.classList.remove("active"));
+        document.getElementById(formName).classList.add("active");
+        clearAlert();
+      }
+
+      // Register
+      document
+        .getElementById("register-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const name = document.getElementById("register-name").value;
+          const email = document.getElementById("register-email").value;
+          const password = document.getElementById("register-password").value;
+          const confirm = document.getElementById("register-confirm").value;
+
+          if (password !== confirm) {
+            showAlert("Passwords do not match");
+            return;
+          }
+
+          try {
+            const response = await fetch(`${API_URL}/api/auth/register`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name, email, password }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              showAlert("Registration successful! Please login.", "success");
+              setTimeout(() => toggleForm(), 2000);
+            } else {
+              showAlert(data.message);
+            }
+          } catch (error) {
+            showAlert("Registration failed: " + error.message);
+          }
+        });
+
+      // Login
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const email = document.getElementById("login-email").value;
+          const password = document.getElementById("login-password").value;
+
+          try {
+            const response = await fetch(`${API_URL}/api/auth/login`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              currentUser = data.user_id;
+              localStorage.setItem("session_token", data.session_token);
+              showForm("verify-section");
+
+              // Show code from response if in development
+              if (data.dev_code) {
+                showAlert(
+                  `✓ Verification code: ${data.dev_code} (Check backend console or email)`,
+                  "success",
+                );
+              } else {
+                showAlert("Verification code sent to your email", "success");
+              }
+            } else {
+              showAlert(data.message);
+            }
+          } catch (error) {
+            showAlert("Login failed: " + error.message);
+          }
+        });
+
+      // Verify
+      document
+        .getElementById("verify-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const code = document.getElementById("verify-code").value;
+
+          try {
+            const response = await fetch(`${API_URL}/api/auth/verify`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ user_id: currentUser, code }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              localStorage.setItem("token", data.token);
+              localStorage.setItem("user_id", currentUser);
+              window.location.href = "dashboard.html";
+            } else {
+              showAlert(data.message);
+            }
+          } catch (error) {
+            showAlert("Verification failed: " + error.message);
+          }
+        });
+    </script>
+  </body>
+</html>

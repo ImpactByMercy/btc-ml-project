@@ -4,3 +4,8 @@ __pycache__/
 data/raw/
 data/processed/
 .env
+venv_crypto/
+.venv/
+*.pkl
+node_modules/
+.DS_Store

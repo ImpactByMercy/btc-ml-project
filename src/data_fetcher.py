@@ -1,36 +1,21 @@
 import requests
 import pandas as pd
-import os
 
-def fetch_binance(symbol="BTCUSDT", interval="1d", limit=1000):
+def fetch_binance(symbol="BTCUSDT", interval="1d", limit=500):
     url = "https://api.binance.com/api/v3/klines"
-    params = {"symbol": symbol, "interval": interval, "limit": limit}
-    response = requests.get(url, params=params, timeout=15)
+    params = {"symbol": symbol, "interval": interval, "limit": min(limit, 1000)}
+    response = requests.get(url, params=params, timeout=10)
     response.raise_for_status()
-    data = response.json()
-
-    df = pd.DataFrame(data, columns=[
-        "open_time", "open", "high", "low", "close", "volume",
-        "close_time", "quote_asset_volume", "num_trades",
-        "taker_base_volume", "taker_quote_volume", "ignore"
+    raw = response.json()
+    df = pd.DataFrame(raw, columns=[
+        "open_time","open","high","low","close","volume",
+        "close_time","quote_volume","trades",
+        "taker_buy_base","taker_buy_quote","ignore"
     ])
-
-    df["open_time"] = pd.to_datetime(df["open_time"], unit='ms')
-    for col in ["open", "high", "low", "close", "volume"]:
+    df["open_time"] = pd.to_datetime(df["open_time"], unit="ms")
+    for col in ["open","high","low","close","volume"]:
         df[col] = df[col].astype(float)
-
-    df = df.drop(columns=["ignore"])
-    df = df.set_index("open_time")
+    df = df[["open_time","open","high","low","close","volume"]].copy()
+    df.set_index("open_time", inplace=True)
+    df.sort_index(inplace=True)
     return df
-
-def save_raw(df, symbol="BTCUSDT"):
-    os.makedirs("data/raw", exist_ok=True)
-    path = f"data/raw/{symbol}_raw.csv"
-    df.to_csv(path)
-    print(f"Saved {len(df)} rows to {path}")
-
-if __name__ == "__main__":
-    print("Fetching Bitcoin data from Binance...")
-    df = fetch_binance("BTCUSDT", "1d", 1000)
-    save_raw(df)
-    print(df.tail(3))
