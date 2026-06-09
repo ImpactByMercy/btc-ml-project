@@ -19,7 +19,7 @@ from email_service import send_verification_email
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, origins=["https://scintillating-twilight-981d79.netlify.app", "http://localhost:8000", "http://localhost:3000"])
+CORS(app)
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['JWT_SECRET'] = os.getenv('JWT_SECRET')
